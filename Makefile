@@ -1,7 +1,7 @@
 # Top level control for managing the dev work
 
 # ----- Project Macro ----- #
-UnitTestName := MyAlgorithmTest
+UnitTestName := SCDCalibratePanelsTest
 TestScript := test.py
 
 # ------------------------------------------------------ #

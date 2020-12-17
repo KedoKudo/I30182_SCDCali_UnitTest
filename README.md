@@ -1,5 +1,9 @@
-# MantidWorkbench_dev_template
-This is a template for setting up a development repo for MantidWorkbench related tasks.
+# Overview
+This project is assocaited with task
+
+https://code.ornl.gov/sns-hfir-scse/diffraction/single-crystal/single-crystal-diffraction/-/issues/163
+
+where a forward modeling based unit test needs to be implemented for SCDCalibratePanels.
 
 # Folder renaming convention
 
