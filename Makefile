@@ -23,11 +23,11 @@ ifneq (,$(findstring analysis,$(HOSTNAME)))
 	# on analysis cluster, need to turn off jemalloc for RHEL_7
 	CMKOPTS := $(BASEOPTS) -DUSE_JEMALLOC=OFF
 	CMKCMDS := cmake3 $(MANTIDDIR) $(CMKOPTS)
-	BLDCMDS := ninja all AlgorithmsTest && ninja install ; true
+	BLDCMDS := ninja all AllTests && ninja install ; true
 else
 	CMKOPTS := $(BASEOPTS)
 	CMKCMDS := cmake $(MANTIDDIR) $(CMKOPTS)
-	BLDCMDS := ninja -j4 all AlgorithmsTest && ninja install ; true
+	BLDCMDS := ninja -j4 all AllTests && ninja install ; true
 endif
 
 # ----- UNIT TEST -----
