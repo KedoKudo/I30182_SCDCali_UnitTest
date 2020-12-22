@@ -2,31 +2,57 @@
 # within Mantid
 
 import numpy as np
+from collections import namedtuple
 
+from mantid.simpleapi import mtd
 from mantid.simpleapi import CreateSimulationWorkspace
 from mantid.simpleapi import SetUB
 from mantid.simpleapi import PredictPeaks
 from mantid.simpleapi import MoveInstrumentComponent
 from mantid.geometry import CrystalStructure
 
+
+def convert(dictionary):
+    return namedtuple('GenericDict', dictionary.keys())(**dictionary)
+
+
 # lattice constant for natrolite
 # M. Ross, M. Flohr, and D. Ross,
 # Crystalline Solution Seriesand Order-Disorderwithin the Natrolite Mineral Group
 # American Mineralogist 77, 685 (1992).
-a = 18.29  # A
-b = 18.64  # A
-c = 6.56  # A
-alpha = 90  # deg
-beta = 90  # deg
-gamma = 90  # deg
 lc_natrolite = {
-    "a": a,
-    "b": b,
-    "c": c,
-    "alpha": alpha,
-    "beta": beta,
-    "gamma": gamma,
+    "a": 18.29,  # A
+    "b": 18.64,  # A
+    "c": 6.56,  # A
+    "alpha": 90,  # deg
+    "beta": 90,  # deg
+    "gamma": 90,  # deg
 }
+natrolite = convert(lc_natrolite)
+# we don't have a clear way to setup crystal for natrolite
+# TODO:
+cs_natrolite = CrystalStructure(
+    f'{natrolite.a} {natrolite.b} {natrolite.c}',
+    'f d d 2',
+    '',  # what should we do with this one
+)
+
+# lattice constant for Si
+# data from Mantid web documentation
+lc_silicon = {
+    "a": 5.431,  # A 
+    "b": 5.431,  # A 
+    "c": 5.431,  # A
+    "alpha": 90,  # deg
+    "beta": 90,  # deg
+    "gamma": 90,  # deg
+}
+silicon = convert(lc_silicon)
+cs_silicon = CrystalStructure(
+    f"{silicon.a} {silicon.b} {silicon.c}",
+    "F d -3 m",
+    "Si 0 0 0 1.0 0.05",
+)
 
 # Generate simulated workspace for CORELLI
 CreateSimulationWorkspace(
@@ -35,6 +61,7 @@ CreateSimulationWorkspace(
     UnitX='TOF',
     OutputWorkspace='cws',
 )
+cws = mtd['cws']
 
 # Set the UB matrix for the sample
 # u, v is the critical part, we can start with the
@@ -46,4 +73,23 @@ SetUB(
     **lc_natrolite,
 )
 
-# Creat crystal structure
+# set the crystal structure for virtual workspace
+cws.sample().setCrystalStructure(cs_silicon)
+
+# Move the instrument with pre-defined value
+
+# Generate predicted peak workspace
+dspacings = convert({'min': 1.0, 'max': 10.0})
+wavelengths = convert({'min': 0.8, 'max': 2.9})
+
+PredictPeaks(
+    InputWorkspace='cws',
+    CalculateStructureFactor=True,
+    WavelengthMin=wavelengths.min,
+    wavelengthMax=wavelengths.max,
+    MinDSpacing=dspacings.min,
+    MaxDSpacing=dspacings.max,
+    ReflectionCondition='All-face centred',
+    OutputWorkspace='pws',
+)
+pws = mtd['pws']
