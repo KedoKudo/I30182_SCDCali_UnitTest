@@ -3,16 +3,21 @@
 
 import numpy as np
 from collections import namedtuple
+from tqdm import tqdm
 
 from mantid.simpleapi import mtd
 from mantid.simpleapi import CombinePeaksWorkspaces
+from mantid.simpleapi import CloneWorkspace
 from mantid.simpleapi import CreateSimulationWorkspace
 from mantid.simpleapi import CreatePeaksWorkspace
+from mantid.simpleapi import LoadIsawDetCal
 from mantid.simpleapi import SetGoniometer
 from mantid.simpleapi import SetUB
 from mantid.simpleapi import PredictPeaks
 from mantid.simpleapi import MoveInstrumentComponent
 from mantid.geometry import CrystalStructure
+
+from mantid.simpleapi import SCDCalibratePanels
 
 
 def convert(dictionary):
@@ -87,7 +92,7 @@ wavelengths = convert({'min': 0.8, 'max': 2.9})
 CreatePeaksWorkspace(OutputWorkspace='pws')
 omegas = range(0, 180, 3)
 
-for i, omega in enumerate(omegas):
+for omega in tqdm(omegas):
     SetGoniometer(
         Workspace="cws",
         Axis0=f"{omega},0,1,0,1",
@@ -110,3 +115,28 @@ for i, omega in enumerate(omegas):
     )
 
 pws = mtd['pws']
+
+# Test_1: null test
+# no movement of any detector
+SCDCalibratePanels(
+    PeakWorkspace="pws",
+    a=silicon.a,
+    b=silicon.b,
+    c=silicon.c,
+    alpha=silicon.alpha,
+    beta=silicon.beta,
+    gamma=silicon.gamma,
+    changeL1=True,
+    changeT0=False,
+    CalibrateBanks=True,
+    DetCalFilename='null_case.DetCal',
+)
+
+CloneWorkspace(
+    InputWorkspace='cws',
+    OutputWorkspace='cws_nullcase',
+)
+LoadIsawDetCal(
+    InputWorkspace='cws_nullcase',
+    Filename='null_case.DetCal',
+)
