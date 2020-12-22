@@ -435,3 +435,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vscode,pycharm,c++,cmake,python,jetbrains
+ColCalcvsTheor.nxs
+null_case.DetCal
+RowCalcvsTheor.nxs
+TofCalcvsTheor.nxs
