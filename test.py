@@ -5,7 +5,10 @@ import numpy as np
 from collections import namedtuple
 
 from mantid.simpleapi import mtd
+from mantid.simpleapi import CombinePeaksWorkspaces
 from mantid.simpleapi import CreateSimulationWorkspace
+from mantid.simpleapi import CreatePeaksWorkspace
+from mantid.simpleapi import SetGoniometer
 from mantid.simpleapi import SetUB
 from mantid.simpleapi import PredictPeaks
 from mantid.simpleapi import MoveInstrumentComponent
@@ -31,11 +34,11 @@ lc_natrolite = {
 natrolite = convert(lc_natrolite)
 # we don't have a clear way to setup crystal for natrolite
 # TODO:
-cs_natrolite = CrystalStructure(
-    f'{natrolite.a} {natrolite.b} {natrolite.c}',
-    'f d d 2',
-    '',  # what should we do with this one
-)
+# cs_natrolite = CrystalStructure(
+#     f'{natrolite.a} {natrolite.b} {natrolite.c}',
+#     'f d d 2',
+#     '',  # what should we do with this one
+# )
 
 # lattice constant for Si
 # data from Mantid web documentation
@@ -76,20 +79,34 @@ SetUB(
 # set the crystal structure for virtual workspace
 cws.sample().setCrystalStructure(cs_silicon)
 
-# Move the instrument with pre-defined value
-
 # Generate predicted peak workspace
 dspacings = convert({'min': 1.0, 'max': 10.0})
 wavelengths = convert({'min': 0.8, 'max': 2.9})
 
-PredictPeaks(
-    InputWorkspace='cws',
-    CalculateStructureFactor=True,
-    WavelengthMin=wavelengths.min,
-    wavelengthMax=wavelengths.max,
-    MinDSpacing=dspacings.min,
-    MaxDSpacing=dspacings.max,
-    ReflectionCondition='All-face centred',
-    OutputWorkspace='pws',
-)
+# Collect peaks over a range of omegas
+CreatePeaksWorkspace(OutputWorkspace='pws')
+omegas = range(0, 180, 3)
+
+for i, omega in enumerate(omegas):
+    SetGoniometer(
+        Workspace="cws",
+        Axis0=f"{omega},0,1,0,1",
+    )
+
+    PredictPeaks(
+        InputWorkspace='cws',
+        WavelengthMin=wavelengths.min,
+        wavelengthMax=wavelengths.max,
+        MinDSpacing=dspacings.min,
+        MaxDSpacing=dspacings.max,
+        ReflectionCondition='All-face centred',
+        OutputWorkspace='_pws',
+    )
+
+    CombinePeaksWorkspaces(
+        LHSWorkspace="_pws",
+        RHSWorkspace="pws",
+        OutputWorkspace="pws",
+    )
+
 pws = mtd['pws']
