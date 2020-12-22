@@ -78,7 +78,7 @@ SetUB(
     Workspace="cws",
     u='1,0,0',  # vector along k_i, when goniometer is at 0
     v='0,1,0',  # in-plane vector normal to k_i, when goniometer is at 0
-    **lc_natrolite,
+    **lc_silicon,
 )
 
 # set the crystal structure for virtual workspace
