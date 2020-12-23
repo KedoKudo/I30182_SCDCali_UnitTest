@@ -75,6 +75,9 @@ init:
 	@echo "running cmake"
 	@cd ${BUILDDIR}; ${CMKCMDS}
 
+reconfig:
+	@echo "reconfig cmake"
+	@cd ${BUILDDIR}; ${CMKCMDS}
 
 # list all possible target in this makefile
 list:
