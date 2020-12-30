@@ -130,6 +130,7 @@ SCDCalibratePanels(
     changeT0=False,
     CalibrateBanks=True,
     DetCalFilename='null_case.DetCal',
+    XmlFilename='null_case.xml',
 )
 
 CloneWorkspace(
