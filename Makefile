@@ -31,7 +31,7 @@ else
 endif
 
 # ----- UNIT TEST -----
-UNTCMDS := ctest --output-on-failure -R $(UnitTestName)
+UNTCMDS := ctest --timeout 3600 --output-on-failure -R $(UnitTestName)
 
 # ----- Targets -----
 .PHONY: test qtest build unittest docs init list clean archive
